@@ -6,7 +6,7 @@
 /*   By: jrandet <jrandet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 19:15:18 by jrandet           #+#    #+#             */
-/*   Updated: 2024/11/10 17:45:54 by jrandet          ###   ########.fr       */
+/*   Updated: 2024/11/10 18:23:52 by jrandet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,8 +67,6 @@ char	*read_and_append(char *stash, int fd)
 	char	*temp;
 
 	bytes_read = read(fd, buff, BUFFER_SIZE);
-	if (bytes_read == 0)
-		return (stash);
 	while (bytes_read > 0)
 	{
 		buff[bytes_read] = '\0';
@@ -77,6 +75,8 @@ char	*read_and_append(char *stash, int fd)
 			return (free_and_return_null(&stash));
 		free(stash);
 		stash = temp;
+		if (ft_strchr(stash, '\n'))
+			break;
 		bytes_read = read(fd, buff, BUFFER_SIZE);
 	}
 	if (bytes_read == -1)
@@ -90,20 +90,18 @@ char	*get_next_line(int fd)
 	char		*line;
 
 	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
-		return (NULL);
+		return (free_and_return_null(&stash));
 	if (!stash)
 	{
 		stash = ft_strdup("");
 		if (!stash)
-			return (stash);
+			return (NULL);
 	}
 	stash = read_and_append(stash, fd);
-	if (!stash)
-		return (free_and_return_null(&stash));
-	if (*stash == '\0') //EMPTY STRING CASE IF SO WE DO NOT NEED a stash
+	if (!stash || *stash == '\0')
 		return (free_and_return_null(&stash));
 	line = extract_line(stash); //even if we have "abcdefju"
-	if (!line)
+	if (!line || line[0] == '\0')
 		return (free_and_return_null(&stash));
 	stash = updated_stash(&stash);
 	return (line);

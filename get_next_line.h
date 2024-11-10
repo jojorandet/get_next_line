@@ -6,7 +6,7 @@
 /*   By: jrandet <jrandet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 19:00:43 by jrandet           #+#    #+#             */
-/*   Updated: 2024/11/10 13:09:46 by jrandet          ###   ########.fr       */
+/*   Updated: 2024/11/10 18:13:18 by jrandet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ char	*read_and_append(char *stash, int fd);
 char	*extract_line(char *stash);
 char	*updated_stash(char **stash);
 char	*ft_strdup(char *s1);
-void	ft_free(void *ptr);
+char	*ft_strchr(const char *s, int c);
 char	*free_and_return_null(char **stash);
 
 #endif

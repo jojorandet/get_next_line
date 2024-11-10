@@ -6,18 +6,20 @@
 /*   By: jrandet <jrandet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 20:36:43 by jrandet           #+#    #+#             */
-/*   Updated: 2024/11/10 11:49:25 by jrandet          ###   ########.fr       */
+/*   Updated: 2024/11/10 18:12:47 by jrandet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-void	ft_free(void *ptr)
+char	*ft_strchr(const char *s, int c)
 {
-	if (!ptr)
-		return ;
-	free(ptr);
-	ptr = NULL;
+	while (*s && (*s != (char)c))
+		s++;
+	if (*s == (char)c)
+		return ((char *)s);
+	else
+		return (NULL);
 }
 
 int	ft_strlen(char *str)
