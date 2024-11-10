@@ -5,24 +5,30 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: jrandet <jrandet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/11/05 11:18:14 by jrandet           #+#    #+#             */
-/*   Updated: 2024/11/07 15:59:01 by jrandet          ###   ########.fr       */
+/*   Created: 2024/11/07 20:36:43 by jrandet           #+#    #+#             */
+/*   Updated: 2024/11/10 11:49:25 by jrandet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
-#include <stdio.h>
 
-int	ft_strlen(char *s1)
+void	ft_free(void *ptr)
 {
-	int	i;
+	if (!ptr)
+		return ;
+	free(ptr);
+	ptr = NULL;
+}
 
+int	ft_strlen(char *str)
+{
+	int i;
+
+	if (!str)
+		return (0);
 	i = 0;
-	while (*s1)
-	{
-		s1++;
+	while (str[i])
 		i++;
-	}
 	return (i);
 }
 
@@ -40,61 +46,56 @@ char	*ft_strdup(char *s1)
 		return (NULL);
 	cursor = pt;
 	while (*s1)
-		*cursor++ = *s1++;
+	{
+		*cursor = *s1;
+		cursor++;
+		s1++;
+	}
 	*cursor = '\0';
 	return (pt);
 }
 
-char	*ft_strjoin(char *s1, char *s2)
+char	*ft_strjoin(char *str1, char *str2)
 {
-	char	*joined_string;
-	char	*ptr;
-	size_t	total_len;
-
-	if (!s1 && !s2)
+	int		total_len;
+	char	*new_string;
+	char	*current;
+	
+	if (!str1 || !str2)
 		return (NULL);
-	total_len = ft_strlen(s1) + ft_strlen(s2);
-	joined_string = (char *)malloc(1 + sizeof(char) * total_len);
-	if (!joined_string)
+	total_len = ft_strlen(str1) + ft_strlen(str2);
+	new_string = (char *)malloc(sizeof(char) * (total_len + 1));
+	if (!new_string)
 		return (NULL);
-	ptr = joined_string;
-	while (*s1)
-		*ptr++ = *s1++;
-	while (*s2)
-		*ptr++ = *s2++;
-	*ptr = '\0';
-	return (joined_string);
+	current = new_string;
+	while (*str1)
+		*current++ = *str1++;
+	while (*str2)
+		*current++ = *str2++;
+	*current = '\0';
+	return (new_string);
 }
 
-char	*ft_substr(char *s1, unsigned int start, size_t len)
+char	*ft_substr(char	*s1, int start_pos, int sub_len)
 {
-	char	*substr;
-	char	*sub_ptr;
-	size_t		str_len;
+	int		s1_len;
+	char	*extracted_string;
+	char	*current;
 
 	if (!s1)
 		return (NULL);
-	str_len = ft_strlen(s1);
-	if (start >= str_len)
-		return (ft_strdup(""));
-	if (len > str_len - start)
-		len = str_len - start;
-	substr = (char *)malloc(len + 1);
-	if (!substr)
+	s1_len = ft_strlen(s1);
+	if (start_pos > s1_len)
 		return (NULL);
-	sub_ptr = substr;
-	s1 += start;
-	while (*s1 && len--)
-		*sub_ptr++ = *s1++;
-	*sub_ptr = '\0';
-	return (substr);
+	if (sub_len > s1_len - start_pos)
+		sub_len = s1_len - start_pos;
+	extracted_string = (char *)malloc(sizeof(char) * (sub_len + 1));
+	if (!extracted_string)
+		return (NULL);
+	s1 += start_pos;
+	current = extracted_string;
+	while (*s1 && sub_len--)
+		*current++ = *s1++;
+	*current = '\0';
+	return (extracted_string);
 }
-
-// int main()
-// {
-// 	char	*s1 = "Hello ";
-// 	char	*s2 = "world\n";
-
-// 	printf("the copied string is %s\n", ft_strjoin(s1, s2));
-// 	return (0);
-// }

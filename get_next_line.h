@@ -5,30 +5,31 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: jrandet <jrandet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/11/05 11:18:41 by jrandet           #+#    #+#             */
-/*   Updated: 2024/11/07 16:37:18 by jrandet          ###   ########.fr       */
+/*   Created: 2024/11/07 19:00:43 by jrandet           #+#    #+#             */
+/*   Updated: 2024/11/10 13:09:46 by jrandet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+#include <fcntl.h>
+#include <unistd.h>
+#include <stdlib.h>
 
 #ifndef GET_NEXT_LINE_H
 # define GET_NEXT_LINE_H
 
-# include <fcntl.h>
-# include <unistd.h>
-# include <stdlib.h>
-
 # ifndef BUFFER_SIZE
-#  define BUFFER_SIZE 500
+#  define BUFFER_SIZE 1024
 # endif
 
+int		ft_strlen(char *str);
+char	*ft_strjoin(char *str1, char *str2);
+char	*ft_substr(char	*s1, int start_pos, int sub_len);
 char	*get_next_line(int fd);
+char	*read_and_append(char *stash, int fd);
+char	*extract_line(char *stash);
+char	*updated_stash(char **stash);
 char	*ft_strdup(char *s1);
-int		ft_strlen(char *s1);
-int		find_next_line(char	*storage);
-char	*fill_storage_until_nl(char **storage, int fd);
-char	*ft_strjoin(char *s1, char *s2);
-char	*ft_extract_line(char **storage, int pos_nl);
-char	*ft_remainder(char	**storage, int pos_nl);
-char	*ft_substr(char *s1, unsigned int start, size_t len);
+void	ft_free(void *ptr);
+char	*free_and_return_null(char **stash);
 
 #endif

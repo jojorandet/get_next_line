@@ -5,117 +5,106 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: jrandet <jrandet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/11/05 11:18:17 by jrandet           #+#    #+#             */
-/*   Updated: 2024/11/07 17:07:39 by jrandet          ###   ########.fr       */
+/*   Created: 2024/11/07 19:15:18 by jrandet           #+#    #+#             */
+/*   Updated: 2024/11/10 17:45:54 by jrandet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 #include <stdio.h>
 
-char	*ft_remainder(char	**storage, int pos_nl)
+char	*free_and_return_null(char **stash)
 {
-	char	*temp_storage;
-	size_t	remaining_len;
-
-	remaining_len = ft_strlen(*storage) - pos_nl - 1;
-	temp_storage = ft_substr(*storage, pos_nl + 1, remaining_len);
-	if (!temp_storage)
-		return (NULL);
-	return (temp_storage);
+	if (*stash)
+	{
+		free(*stash);
+		*stash = NULL; 
+	}
+	return (NULL);
 }
 
-char	*ft_extract_line(char **storage, int pos_nl)
+char	*updated_stash(char **old_stash) //changes the stash directly, so we need 
 {
-	char		*temp_storage;
-	char		*line;
+	char	*new_stash;
+	int		len;
 
-	line = ft_substr(*storage, 0, pos_nl);
-	if (!line)
-	{
-		free (*storage);
-		*storage = NULL;
+	len = 0;
+	if (!*old_stash)
 		return (NULL);
-	}
-	temp_storage = ft_remainder(storage, pos_nl);
-	if (!temp_storage)
-	{
-		free (line);
+	while ((*old_stash)[len] && (*old_stash)[len] != '\n')
+		len++;
+	if ((*old_stash)[len] == '\0')
+		return (free_and_return_null(old_stash));
+	len++;
+	new_stash = ft_substr(*old_stash, len, ft_strlen(*old_stash) - len);
+	if (!new_stash)
+		return (free_and_return_null(old_stash));
+	free(*old_stash);
+	*old_stash = new_stash;
+	return (new_stash);
+}
+
+char	*extract_line(char *stash)
+{
+	int		len;
+	char	*line;
+
+	len = 0;
+	if (!stash)
 		return (NULL);
-	}
-	free (*storage);
-	*storage = temp_storage;
+	while (stash[len] && stash[len] != '\n')
+		len++; // will read the whole string
+	if (stash[len] == '\n')
+		len++; //this accounts for the \n
+	line = ft_substr(stash, 0, len); //it extracts the entire string even if no \n
 	return (line);
 }
 
-int	find_next_line(char	*storage)
+char	*read_and_append(char *stash, int fd)
 {
-	int	i;
+	int		bytes_read;
+	char	buff[BUFFER_SIZE + 1];
+	char	*temp;
 
-	i = 0;
-	while (storage[i])
+	bytes_read = read(fd, buff, BUFFER_SIZE);
+	if (bytes_read == 0)
+		return (stash);
+	while (bytes_read > 0)
 	{
-		if (*storage == '\n')
-			return (i);
-		i++;
-	}
-	return (-1);
-}
-
-char	*fill_storage_until_nl(char **storage, int fd)
-{
-	char		buff[BUFFER_SIZE + 1];
-	int			bytesread;
-	char		*temp;
-
-	while (1)
-	{
-		bytesread = read(fd, buff, BUFFER_SIZE);
-		if (bytesread <= 0)
-		{
-			*storage = NULL;
-			break ;
-		}	
-		buff[bytesread] = '\0';
-		temp = ft_strjoin(*storage, buff);
+		buff[bytes_read] = '\0';
+		temp = ft_strjoin(stash, buff);
 		if (!temp)
-			return (NULL);
-		free (*storage);
-		*storage = temp;
-		if (find_next_line(*storage) != -1)
-			break ;
+			return (free_and_return_null(&stash));
+		free(stash);
+		stash = temp;
+		bytes_read = read(fd, buff, BUFFER_SIZE);
 	}
-	if (bytesread == 0 && **storage == '\0')
-	{
-		free(*storage);
-		*storage = NULL;
-		return (NULL);
-	}
-	return (*storage);
+	if (bytes_read == -1)
+		return (free_and_return_null(&stash));
+	return (stash);
 }
 
 char	*get_next_line(int fd)
 {
-	static char	*storage;
-	int			pos_nl;
+	static char	*stash;
 	char		*line;
 
-	if (fd == -1)
+	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
 		return (NULL);
-	if (!storage)
-		storage = ft_strdup("");
-	if (!storage)
-		return (NULL);
-	if (!fill_storage_until_nl(&storage, fd))
-		return (NULL);
-	pos_nl = find_next_line(storage);
-	if (pos_nl == -1)
+	if (!stash)
 	{
-		line = ft_strdup(storage);
-		free (storage);
-		storage = NULL;
-		return (line);
+		stash = ft_strdup("");
+		if (!stash)
+			return (stash);
 	}
-	line = ft_extract_line(&storage, pos_nl);
+	stash = read_and_append(stash, fd);
+	if (!stash)
+		return (free_and_return_null(&stash));
+	if (*stash == '\0') //EMPTY STRING CASE IF SO WE DO NOT NEED a stash
+		return (free_and_return_null(&stash));
+	line = extract_line(stash); //even if we have "abcdefju"
+	if (!line)
+		return (free_and_return_null(&stash));
+	stash = updated_stash(&stash);
 	return (line);
 }
