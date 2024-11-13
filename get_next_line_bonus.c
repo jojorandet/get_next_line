@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*   get_next_line_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: jrandet <jrandet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 19:15:18 by jrandet           #+#    #+#             */
-/*   Updated: 2024/11/13 17:25:09 by jrandet          ###   ########.fr       */
+/*   Updated: 2024/11/13 18:59:14 by jrandet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include "get_next_line_bonus.h"
 #include <stdio.h>
 
 char	*free_and_return_null(char **stash)
@@ -86,23 +86,23 @@ char	*read_and_append(char *stash, int fd)
 
 char	*get_next_line(int fd)
 {
-	static char	*stash;
+	static char	*stash_array[MAX_FD];
 	char		*line;
 
-	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
-		return (free_and_return_null(&stash));
-	if (!stash)
+	if (fd < 0 || fd >= MAX_FD || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
+		return (free_and_return_null(&stash_array[fd]));
+	if (!stash_array[fd])
 	{
-		stash = ft_strdup("");
-		if (!stash)
+		stash_array[fd] = ft_strdup("");
+		if (!stash_array[fd])
 			return (NULL);
 	}
-	stash = read_and_append(stash, fd);
-	if (!stash || !*stash)
-		return (free_and_return_null(&stash));
-	line = extract_line(stash);
+	stash_array[fd] = read_and_append(stash_array[fd], fd);
+	if (!stash_array[fd] || !*stash_array[fd])
+		return (free_and_return_null(&stash_array[fd]));
+	line = extract_line(stash_array[fd]);
 	if (!line || line[0] == '\0')
-		return (free_and_return_null(&stash));
-	stash = updated_stash(&stash);
+		return (free_and_return_null(&stash_array[fd]));
+	stash_array[fd] = updated_stash(&stash_array[fd]);
 	return (line);
 }
